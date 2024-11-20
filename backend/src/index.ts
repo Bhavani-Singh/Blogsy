@@ -8,10 +8,11 @@ const app = new Hono<{
     Bindings: {
         DATABASE_URL: string,
         JWT_SECRET: string
+    },
+    Variables: {
+        userId: string
     }
 }>();
-
-app.get("/", (c) => c.text("Hello Hono"));
 
 app.post('/api/v1/user/signup', async (c) => {
 
@@ -40,12 +41,91 @@ app.post('/api/v1/user/signup', async (c) => {
     }
     catch(error) {
         c.status(403)
-        return c.json({message: "failure while creating new user", error});
+        return c.json({error: "failure while creating new user",});
     }
 })
 
-app.post('/api/v1/user/signin', (c) => {
-    return c.json({message: 'User signin'})
+app.post('/api/v1/user/signin', async (c) => {
+    const prisma = new PrismaClient({
+        datasourceUrl: c.env.DATABASE_URL,
+    }).$extends(withAccelerate());
+
+    const body = await c.req.json();
+
+    try {
+        const result = await prisma.buser.findUnique({
+            where: {
+                email: body.username
+            }
+        });
+
+        if(result) {
+            const payload = {
+                id: result.id
+            }
+            const jwt_token = await sign(payload, c.env.JWT_SECRET);
+
+            c.status(200)
+
+            return c.json({
+                jwt: jwt_token
+            });
+        }
+        else {
+            c.status(401)
+            return c.json({
+                error: "Invalid credentials"
+            });
+        }
+    }
+    catch(error) {
+        c.status(500)
+        return c.json({
+            error: 'Internal server error'
+        });
+    }
+});
+
+
+app.use('/api/v1/blog/*', async (c, next) => {
+    const jwt = c.req.header('Authorization');
+    
+    if(!jwt) {
+        c.status(401);
+        return c.json({
+            error: 'unauthorized'
+        });
+    }
+
+    const token = jwt.split(' ')[1];
+
+    console.log(token);
+
+    try {
+        const payload = await verify(token, c.env.JWT_SECRET);
+
+        console.log(payload);
+
+        if(payload && typeof payload.id === 'string') {
+            c.set('userId', payload.id);
+            await next(); 
+        }
+        else {
+            c.status(401);
+            return c.json({
+                error: 'unauthorized'
+            });
+        }
+    }
+    catch(error) {
+        c.status(401);
+        return c.json({
+        error: 'invalid token'
+        });
+    }
+
+    
+      
 });
 
 app.post('/api/v1/blog', (c) => {
