@@ -28,8 +28,6 @@ blog.use('/*', async (c, next) => {
 
     const token = jwt.split(' ')[1];
 
-    console.log(token);
-
     try {
         const payload = await verify(token, c.env.JWT_SECRET);
 
@@ -47,7 +45,7 @@ blog.use('/*', async (c, next) => {
     catch(error) {
         c.status(401);
         return c.json({
-        error: 'invalid token'
+        error: 'unauthorized'
         });
     }     
 });
@@ -90,7 +88,7 @@ blog.post('/', async (c) => {
                 });
             }
             else {
-                c.status(401)
+                c.status(403)
                 return c.json({
                     error: 'forbidden'
                 });
@@ -106,16 +104,120 @@ blog.post('/', async (c) => {
     return c.json({message: 'Blog post'})
 });
 
-blog.put('blog', (c) => {
+blog.put('/', async (c) => {
+    const prisma = new PrismaClient({
+        datasourceUrl: c.env.DATABASE_URL,
+    }).$extends(withAccelerate());
+
+    const userId = c.get('userId');
+    const body = await c.req.json();
+
+    try {
+        const result = await prisma.bpost.update({
+            where: {
+                id: body.id,
+                authorId: userId
+            },
+            data: {
+                title: body.title,
+                content: body.content
+            }
+        });
+
+        if(result) {
+            c.status(200)
+            return c.json({
+                message: 'Post updated successfully'
+            })
+        }
+    }
+    catch(error) {
+        c.status(500);
+        return c.json({
+            error: 'Internal server error while updating the post'
+        });
+    }
+
     return c.json({message: 'Blog put'})
 });
 
-blog.get('/api/v1/blog/:id', (c) => {
-    return c.json({message: c.req.param('id')}) 
+
+blog.get('/bulk', async (c) => {
+    console.log('Enter the /bulk handler');
+
+    const prisma = new PrismaClient({
+        datasourceUrl: c.env.DATABASE_URL
+    }).$extends(withAccelerate());
+
+    
+
+    try {
+
+        console.log('Entered the try block');
+        const result = await prisma.bpost.findMany({
+            skip: 1,
+            take: 10
+        });
+
+        console.log('Result of the query: ' + result);
+
+        if(result) {
+            c.status(200);
+            return c.json(result);
+        }
+        else {
+            c.status(403);
+            return c.json({
+                error: 'Forbidden'
+            });
+        }
+    }
+    catch(error) {
+        c.status(500);
+        return c.json({
+            error: 'Internal server error while fetching blogs'
+        });
+    }
+    
 });
 
-blog.get('/api/v1/blog/bulk', (c) => {
-    return c.json({message: 'Blog bulk'})
+
+blog.get('/:id', async (c) => {
+    console.log('Entered the /:id handler');
+
+    const prisma = new PrismaClient({
+        datasourceUrl: c.env.DATABASE_URL
+    }).$extends(withAccelerate());
+
+    const blogId = c.req.param('id');
+
+    try {
+        const result = await prisma.bpost.findUnique({
+            where: {
+                id: blogId
+            }
+        });
+    
+        if(result) {
+            c.status(200)
+            return c.json(result);
+        }
+        else {
+            console.log('/:id handler return statement')
+            c.status(403);
+            return c.json({
+                error: 'Forbidden'
+            })
+        }
+        
+    }
+    catch(error) {
+        c.status(500);
+        return c.json({
+            error: 'Internal server error while fetching the blog'
+        })
+    }
 });
+
 
 export default blog;
