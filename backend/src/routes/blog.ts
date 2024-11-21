@@ -143,23 +143,12 @@ blog.put('/', async (c) => {
 
 
 blog.get('/bulk', async (c) => {
-    console.log('Enter the /bulk handler');
-
     const prisma = new PrismaClient({
         datasourceUrl: c.env.DATABASE_URL
-    }).$extends(withAccelerate());
-
-    
+    }).$extends(withAccelerate());   
 
     try {
-
-        console.log('Entered the try block');
-        const result = await prisma.bpost.findMany({
-            skip: 1,
-            take: 10
-        });
-
-        console.log('Result of the query: ' + result);
+        const result = await prisma.bpost.findMany();
 
         if(result) {
             c.status(200);
@@ -183,8 +172,6 @@ blog.get('/bulk', async (c) => {
 
 
 blog.get('/:id', async (c) => {
-    console.log('Entered the /:id handler');
-
     const prisma = new PrismaClient({
         datasourceUrl: c.env.DATABASE_URL
     }).$extends(withAccelerate());
