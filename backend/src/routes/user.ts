@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { PrismaClient } from '@prisma/client/edge';
 import { withAccelerate } from '@prisma/extension-accelerate';
 import {sign} from "hono/jwt";
+import { userSignupSchema, userSiginSchema } from "@ctrlaltelite/common";
 
 export const user = new Hono<{
     Bindings: {
@@ -19,27 +20,37 @@ user.post('/signup', async (c) => {
 
     const body = await c.req.json();
 
-    console.log(body);
+    const parsedResult = userSignupSchema.safeParse(body);
 
-    try {
-        const result = await prisma.buser.create({
-            data: {
-                email: body.email,
-                name: body.name,
-                password: body.password
-            }
+    if(parsedResult.success) {
+        try {
+            const result = await prisma.buser.create({
+                data: {
+                    email: body.email,
+                    name: body.name,
+                    password: body.password
+                }
+            });
+    
+            const payload = { id: result.id}
+            const jwt_token = await sign(payload, c.env.JWT_SECRET);
+            
+            c.status(201);
+            return c.json({message: 'User created successfully', jwt_token});
+        }
+        catch(error) {
+            c.status(403)
+            return c.json({error: "failure while creating new user",});
+        }
+    }
+    else {
+        c.status(422);
+        return c.json({
+            error: 'Invalid data'
         });
+    }
 
-        const payload = { id: result.id}
-        const jwt_token = await sign(payload, c.env.JWT_SECRET);
-        
-        c.status(201);
-        return c.json({message: 'User created successfully', jwt_token});
-    }
-    catch(error) {
-        c.status(403)
-        return c.json({error: "failure while creating new user",});
-    }
+    
 })
 
 user.post('/signin', async (c) => {
@@ -49,36 +60,46 @@ user.post('/signin', async (c) => {
 
     const body = await c.req.json();
 
-    try {
-        const result = await prisma.buser.findUnique({
-            where: {
-                email: body.username
-            }
-        });
-
-        if(result) {
-            const payload = {
-                id: result.id
-            }
-            const jwt_token = await sign(payload, c.env.JWT_SECRET);
-
-            c.status(200)
-
-            return c.json({
-                jwt: jwt_token
+    const parsedResult = userSiginSchema.safeParse(body);
+    
+    if(parsedResult.success) {
+        try {
+            const result = await prisma.buser.findUnique({
+                where: {
+                    email: body.username
+                }
             });
+    
+            if(result) {
+                const payload = {
+                    id: result.id
+                }
+                const jwt_token = await sign(payload, c.env.JWT_SECRET);
+    
+                c.status(200)
+    
+                return c.json({
+                    jwt: jwt_token
+                });
+            }
+            else {
+                c.status(401)
+                return c.json({
+                    error: "Invalid credentials"
+                });
+            }
         }
-        else {
-            c.status(401)
+        catch(error) {
+            c.status(500)
             return c.json({
-                error: "Invalid credentials"
+                error: 'Internal server error'
             });
         }
     }
-    catch(error) {
-        c.status(500)
+    else {
+        c.status(422);
         return c.json({
-            error: 'Internal server error'
+            error: 'Invalid data'
         });
     }
 });

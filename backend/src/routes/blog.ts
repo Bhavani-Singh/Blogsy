@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { PrismaClient } from '@prisma/client/edge';
 import { withAccelerate } from '@prisma/extension-accelerate';
 import { verify } from "hono/jwt";
+import { blogSchema } from "@ctrlaltelite/common";
 
 
 export const blog = new Hono<{
@@ -59,49 +60,59 @@ blog.post('/', async (c) => {
     const userId = c.get('userId');
     const body = await c.req.json();
 
-    try {
-        const result = await prisma.bpost.create({
-            data: {
-                title: body.title,
-                content: body.content,
-                authorId: userId
-            }
-        });
+    const parsedResult = blogSchema.safeParse(body);
 
-        if(result) {
-            const postId = result.id;
-            const updatedUser = await prisma.buser.update({
-                where: {
-                    id: userId
-                },
+    if (parsedResult.success) {
+        try {
+            const result = await prisma.bpost.create({
                 data: {
-                    post: {
-                        connect: {id: postId}
-                    }
+                    title: body.title,
+                    content: body.content,
+                    authorId: userId
                 }
             });
-
-            if(updatedUser) {
-                c.status(200);
-                return c.json({
-                    message: 'post created successfully'
+    
+            if(result) {
+                const postId = result.id;
+                const updatedUser = await prisma.buser.update({
+                    where: {
+                        id: userId
+                    },
+                    data: {
+                        post: {
+                            connect: {id: postId}
+                        }
+                    }
                 });
-            }
-            else {
-                c.status(403)
-                return c.json({
-                    error: 'forbidden'
-                });
+    
+                if(updatedUser) {
+                    c.status(200);
+                    return c.json({
+                        message: 'post created successfully'
+                    });
+                }
+                else {
+                    c.status(403)
+                    return c.json({
+                        error: 'forbidden'
+                    });
+                }
             }
         }
+        catch(error) {
+            c.status(500);
+            return c.json({
+                error: 'internal server error while creating the post'
+            })
+        }
     }
-    catch(error) {
-        c.status(500);
+    else {
+        c.status(422);
         return c.json({
-            error: 'internal server error while creating the post'
+            error: 'Invalid data'
         })
     }
-    return c.json({message: 'Blog post'})
+    
 });
 
 blog.put('/', async (c) => {
@@ -112,33 +123,41 @@ blog.put('/', async (c) => {
     const userId = c.get('userId');
     const body = await c.req.json();
 
-    try {
-        const result = await prisma.bpost.update({
-            where: {
-                id: body.id,
-                authorId: userId
-            },
-            data: {
-                title: body.title,
-                content: body.content
-            }
-        });
+    const parsedResult = blogSchema.safeParse(body);
 
-        if(result) {
-            c.status(200)
+    if(parsedResult.success) {
+        try {
+            const result = await prisma.bpost.update({
+                where: {
+                    id: body.id,
+                    authorId: userId
+                },
+                data: {
+                    title: body.title,
+                    content: body.content
+                }
+            });
+    
+            if(result) {
+                c.status(200)
+                return c.json({
+                    message: 'Post updated successfully'
+                })
+            }
+        }
+        catch(error) {
+            c.status(500);
             return c.json({
-                message: 'Post updated successfully'
-            })
+                error: 'Internal server error while updating the post'
+            });
         }
     }
-    catch(error) {
-        c.status(500);
+    else {
+        c.status(422);
         return c.json({
-            error: 'Internal server error while updating the post'
-        });
+            error: 'Invalid data'
+        })
     }
-
-    return c.json({message: 'Blog put'})
 });
 
 
