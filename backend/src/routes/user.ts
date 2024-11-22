@@ -66,7 +66,7 @@ user.post('/signin', async (c) => {
         try {
             const result = await prisma.buser.findUnique({
                 where: {
-                    email: body.username
+                    email: body.email
                 }
             });
     
