@@ -17,4 +17,4 @@ app.use(cors());
 app.route('/api/v1/blog', blog);
 app.route('/api/v1/user', user);
 
-export default app
+export default app;

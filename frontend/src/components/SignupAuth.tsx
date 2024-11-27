@@ -9,27 +9,31 @@ export const SignupAuth = () => {
     const [postInput, setPostInput] = useState<SignupType>({
         email: '',
         name: '',
+        about: '',
         password: ''
     });
 
     const navigate = useNavigate();
 
     async function signUp() {
-        const result = await axios({
-            method: 'post',
-            url: `${BACKENDURL}/user/signup`,
-            data: postInput
-        });
+        try {
+            const result = await axios({
+                method: 'post',
+                url: `${BACKENDURL}/user/signup`,
+                data: postInput
+            });
 
-        if(result) {
-            navigate('/blog');
+            const username = result.data.username;
+            const userId = result.data.userId;
+            const jwt = result.data.jwt_token;
+            localStorage.setItem('token', jwt);
+            localStorage.setItem('username', username);
+            localStorage.setItem('userId', userId);
+
+            navigate('/blogs', {state:{username}});
         }
-        else {
-            return (
-                <div className="flex justify-center items-center bg-orange-400 text-3xl font-black">
-                    Error while signin
-                </div>
-            )
+        catch(error) {
+            alert('Error while signing in!')
         }
     }
 
@@ -51,6 +55,11 @@ export const SignupAuth = () => {
                 <LabelledInput label="Name" value={postInput.name} placeholder="Enter you name" onChange={e => setPostInput({
                     ...postInput,
                     name: e.target.value})}/>
+
+
+                <LabelledInput label="About You" value={postInput.about} placeholder="Software Engineer @ XYZ" onChange={e => setPostInput({
+                    ...postInput,
+                    about: e.target.value})}/>
                 
                 <LabelledInput label="Password" value={postInput.password} placeholder="Min 8 characters" type="password" onChange={e => setPostInput({
                     ...postInput,

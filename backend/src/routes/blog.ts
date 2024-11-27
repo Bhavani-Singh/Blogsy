@@ -68,6 +68,7 @@ blog.post('/', async (c) => {
                 data: {
                     title: body.title,
                     content: body.content,
+                    createdAt: body.createdAt,
                     authorId: userId
                 }
             });
@@ -167,7 +168,15 @@ blog.get('/bulk', async (c) => {
     }).$extends(withAccelerate());   
 
     try {
-        const result = await prisma.bpost.findMany();
+        const result = await prisma.bpost.findMany({
+            include: {
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        });
 
         if(result) {
             c.status(200);
@@ -201,6 +210,14 @@ blog.get('/:id', async (c) => {
         const result = await prisma.bpost.findUnique({
             where: {
                 id: blogId
+            },
+            include: {
+                author: {
+                    select: {
+                        name: true,
+                        about: true
+                    }
+                }
             }
         });
     

@@ -28,15 +28,22 @@ user.post('/signup', async (c) => {
                 data: {
                     email: body.email,
                     name: body.name,
+                    about: body.about,
                     password: body.password
                 }
             });
     
             const payload = { id: result.id}
             const jwt_token = await sign(payload, c.env.JWT_SECRET);
+            const username = result.name;
+            const userId = result.id;
             
             c.status(201);
-            return c.json({message: 'User created successfully', jwt_token});
+            return c.json({
+                message: 'User created successfully', 
+                jwt_token, username,
+                userId
+            });
         }
         catch(error) {
             c.status(403)
@@ -66,11 +73,22 @@ user.post('/signin', async (c) => {
         try {
             const result = await prisma.buser.findUnique({
                 where: {
-                    email: body.email
+                    email: body.email,
                 }
             });
     
             if(result) {
+
+                if(result.password !== body.password) {
+                    c.status(401)
+                    return c.json({
+                        error: "Invalid credentials"
+                    });
+                }
+
+                const username = result.name;
+                const userId = result.id;
+
                 const payload = {
                     id: result.id
                 }
@@ -79,7 +97,9 @@ user.post('/signin', async (c) => {
                 c.status(200)
     
                 return c.json({
-                    jwt: jwt_token
+                    jwt: jwt_token,
+                    username,
+                    userId
                 });
             }
             else {
