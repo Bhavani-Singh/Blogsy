@@ -21,7 +21,7 @@ export const SigninAuth = () => {
         });
 
         if(result) {
-            navigate('/blog');
+            navigate('/blogs');
         }
         else {
             return (

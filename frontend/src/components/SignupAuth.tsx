@@ -30,7 +30,7 @@ export const SignupAuth = () => {
             localStorage.setItem('username', username);
             localStorage.setItem('userId', userId);
 
-            navigate('/blogs', {state:{username}});
+            navigate('/blogs');
         }
         catch(error) {
             alert('Error while signing in!')
