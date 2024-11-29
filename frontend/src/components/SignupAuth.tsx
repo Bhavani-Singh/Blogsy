@@ -34,6 +34,7 @@ export const SignupAuth = ({setLoading}) => {
             navigate('/blogs');
         }
         catch(error) {
+            setLoading(false);
             alert(`Error while signing in!: ${error} `);
             navigate('/signup');
         }

@@ -14,19 +14,20 @@ export const SigninAuth = ({setLoading}) => {
     const navigate = useNavigate();
 
     async function signUp() {
-        setLoading(true);
-        const result = await axios({
-            method: 'post',
-            url: `${BACKENDURL}/user/signin`,
-            data: postInput
-        });
+        try{
+            setLoading(true);
+            const result = await axios({
+                method: 'post',
+                url: `${BACKENDURL}/user/signin`,
+                data: postInput
+            });
 
-        if(result) {
             navigate('/blogs');
         }
-        else {
+        catch(error) {
+            setLoading(false);
             alert('Error while sigin in!');
-            navigate('/signin');
+            navigate('/');
         }
     }
 
