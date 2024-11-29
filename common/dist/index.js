@@ -5,6 +5,7 @@ const zod_1 = require("zod");
 exports.userSignupSchema = zod_1.z.object({
     email: zod_1.z.string().email(),
     name: zod_1.z.string().min(1),
+    about: zod_1.z.string().min(1),
     password: zod_1.z.string().min(8)
 });
 exports.userSiginSchema = zod_1.z.object({
@@ -13,5 +14,6 @@ exports.userSiginSchema = zod_1.z.object({
 });
 exports.blogSchema = zod_1.z.object({
     title: zod_1.z.string().min(1),
-    content: zod_1.z.string().min(5)
+    content: zod_1.z.string().min(5),
+    createdAt: zod_1.z.string().min(1)
 });

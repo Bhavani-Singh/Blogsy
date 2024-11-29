@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar } from "./Avatar"
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
@@ -11,7 +11,7 @@ interface AppBarInputs {
 
 export const AppBar = ({publishCallBack, edit, blogId}: AppBarInputs) => {
     const [showDropDwon, setShowDropDown] = useState(false);
-    const dropDownRef = useRef(null);
+    const dropDownRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
     const location = useLocation();
     const username = localStorage.getItem('username');
@@ -24,8 +24,8 @@ export const AppBar = ({publishCallBack, edit, blogId}: AppBarInputs) => {
 
     // Close the dropdown when clicking outside
     useEffect(() => {
-        const handleClickOutSide = (event) => {
-            if(dropDownRef.current && !dropDownRef.current.contains(event?.target)) {
+        const handleClickOutSide = (event: MouseEvent) => {
+            if(dropDownRef.current && !dropDownRef.current.contains(event?.target as Node)) {
                 setShowDropDown(false);
             }
         };

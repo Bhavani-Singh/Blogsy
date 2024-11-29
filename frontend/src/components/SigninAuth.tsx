@@ -4,8 +4,11 @@ import axios from "axios";
 import { SigninType } from "@ctrlaltelite/common";
 import { BACKENDURL } from "../config";
 
+interface SigninInputs {
+    setLoading: (loading: boolean) => void;
+}
 
-export const SigninAuth = ({setLoading}) => {
+export const SigninAuth = ({setLoading}: SigninInputs) => {
     const [postInput, setPostInput] = useState<SigninType>({
         email: '',
         password: ''
@@ -16,7 +19,7 @@ export const SigninAuth = ({setLoading}) => {
     async function signUp() {
         try{
             setLoading(true);
-            const result = await axios({
+            await axios({
                 method: 'post',
                 url: `${BACKENDURL}/user/signin`,
                 data: postInput
@@ -26,7 +29,7 @@ export const SigninAuth = ({setLoading}) => {
         }
         catch(error) {
             setLoading(false);
-            alert('Error while sigin in!');
+            alert(`Error while sigin in! ${error}`);
             navigate('/');
         }
     }

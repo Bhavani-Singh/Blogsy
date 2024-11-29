@@ -4,6 +4,7 @@ import { BlogType } from "@ctrlaltelite/common";
 import axios from "axios";
 import { BACKENDURL } from "../config";
 import { useNavigate } from "react-router-dom";
+import { LoadingSnipper } from "../components/LoadingSpinner";
 
 export function AddBlog() {
     const [blogData, setBlogData] = useState<BlogType>({
@@ -11,6 +12,7 @@ export function AddBlog() {
         content: '',
         createdAt: ''
     });
+    const [loading, setLoading] = useState(false);
     const titleRef = useRef<HTMLTextAreaElement>(null);
     const contentRef = useRef<HTMLTextAreaElement>(null);
     const navigate = useNavigate();
@@ -31,6 +33,7 @@ export function AddBlog() {
     };
 
     async function submitData() {
+        setLoading(true);
         const token = localStorage.getItem('token');
         const today = new Date();
         const option: Intl.DateTimeFormatOptions = {month: 'short', day: 'numeric', year: 'numeric'};
@@ -57,38 +60,46 @@ export function AddBlog() {
     }
 
     return(
-        <div className="w-dvw h-dvh">
-            <AppBar publishCallBack={submitData}/>
-            
-            <div className="w-full flex mt-10 ml-[350px]">
-                <div>
-                    <div>
-                    <textarea
-                    ref={titleRef}
-                        placeholder="Title"
-                        className="font-serif text-6xl border-none outline-none overflow-hidden resize-none"
-                        onInput={adjustTitleAreaHeight} // Trigger height adjustment on input
-                        rows={1} // Set initial rows
-                        value={blogData.title}
-                        onChange={e => setBlogData({...blogData, title: e.target.value})}
-                    />
-                    </div>
+        <>
+            {!loading ?
+                <div className="w-dvw h-dvh">
+                    <AppBar publishCallBack={submitData}/>
+                    
+                    <div className="w-full flex mt-10 ml-[350px]">
+                        <div>
+                            <div>
+                            <textarea
+                            ref={titleRef}
+                                placeholder="Title"
+                                className="font-serif text-6xl border-none outline-none overflow-hidden resize-none"
+                                onInput={adjustTitleAreaHeight} // Trigger height adjustment on input
+                                rows={1} // Set initial rows
+                                value={blogData.title}
+                                onChange={e => setBlogData({...blogData, title: e.target.value})}
+                            />
+                            </div>
 
-                    <div>
-                    <textarea
-                    ref={contentRef}
-                        placeholder="Tell your Story..."
-                        className="font-serif text-2xl border-none outline-none overflow-hidden resize-none mt-6 w-[700px] text-slate-500"
-                        onInput={adjustContentAreaHeight} // Trigger height adjustment on input
-                        rows={1} // Set initial rows
-                        value={blogData.content}
-                        onChange={e => setBlogData({...blogData, content: e.target.value})}
-                    />
+                            <div>
+                            <textarea
+                            ref={contentRef}
+                                placeholder="Tell your Story..."
+                                className="font-serif text-2xl border-none outline-none overflow-hidden resize-none mt-6 w-[700px] text-slate-500"
+                                onInput={adjustContentAreaHeight} // Trigger height adjustment on input
+                                rows={1} // Set initial rows
+                                value={blogData.content}
+                                onChange={e => setBlogData({...blogData, content: e.target.value})}
+                            />
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
-                
-            </div>
-        </div>
+            :
+                <div className="w-dvh h-dvh flex justify-center items-center">
+                    <LoadingSnipper />
+                </div>
+            }
+        </>
     );
 }
 

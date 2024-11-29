@@ -3,9 +3,18 @@ import { BlogCard } from "../components/BlogCard";
 import axios from "axios";
 import { BACKENDURL } from "../config";
 import { AppBar } from "../components/AppBar";
-import { BlogType } from "@ctrlaltelite/common";
 import { useNavigate } from "react-router-dom";
 import { BlogsSkeleton } from "../components/BlogsSkeleton";
+
+interface BlogType {
+    id: string;
+    title: string;
+    content: string;
+    createdAt: string;
+    author: {
+        name: string;
+    }
+}
 
 export const Blogs = () => {
     const [blogs, setBlogs] = useState([]);
@@ -46,6 +55,7 @@ export const Blogs = () => {
             :
         
             <div className=" flex flex-col items-center gap-2">
+                <BlogsSkeleton />
                 <BlogsSkeleton />
                 <BlogsSkeleton />
                 <BlogsSkeleton />

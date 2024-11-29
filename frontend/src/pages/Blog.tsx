@@ -6,8 +6,30 @@ import { useParams } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { BlogSkeleton } from "../components/BlogSkeleton";
 
+interface BlogType {
+    id: string;
+    title: string;
+    content: string;
+    createdAt: string;
+    authorId: string;
+    author: {
+        name: string;
+        about: string;
+    }
+}
+
 function Blog() {
-    const [blog, setBlog] = useState({});
+    const [blog, setBlog] = useState<BlogType>({
+        id: "",
+        title: "",
+        content: "",
+        createdAt: "",
+        authorId: "",
+        author: {
+            name: "",
+            about: ""
+        }
+    });
     const [loading, setLoading] = useState(true);
 
     const {id: blogId} = useParams();
@@ -47,7 +69,7 @@ function Blog() {
                     {blog.author && (
                         <div className="text-lg">
                             {
-                                blog.content.split("\n").map((paragraph, index) => (
+                                blog.content.split("\n").map((paragraph: string, index: number) => (
                                     <p key={index} className="mt-5">{paragraph}</p>
                             ))}
                         </div>

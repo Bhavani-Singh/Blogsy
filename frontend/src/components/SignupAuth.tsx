@@ -4,8 +4,11 @@ import axios from "axios";
 import { SignupType } from "@ctrlaltelite/common";
 import { BACKENDURL } from "../config";
 
+interface SigninInputs {
+    setLoading: (loading: boolean) => void;
+}
 
-export const SignupAuth = ({setLoading}) => {
+export const SignupAuth = ({setLoading}: SigninInputs) => {
     const [postInput, setPostInput] = useState<SignupType>({
         email: '',
         name: '',
