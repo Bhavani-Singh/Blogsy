@@ -47,7 +47,7 @@ export const SignupAuth = ({setLoading}) => {
                     <h1 className="font-extrabold text-3xl">Create an account</h1>
                     <div className="flex justify-center items-center mt-2 gap-2">
                         <p className="font-medium text-slate-400">Already have an account? </p>
-                        <Link className="underline text-slate-400" to={'/signin'}>Signin</Link>
+                        <Link className="underline text-slate-400" to={'/'}>Signin</Link>
                     </div>
                 </div>
 

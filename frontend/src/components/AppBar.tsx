@@ -1,3 +1,4 @@
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Avatar } from "./Avatar"
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
@@ -9,10 +10,36 @@ interface AppBarInputs {
 }
 
 export const AppBar = ({publishCallBack, edit, blogId}: AppBarInputs) => {
+    const [showDropDwon, setShowDropDown] = useState(false);
+    const dropDownRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
     const username = localStorage.getItem('username');
     const initial = username? username[0] : '';
+
+    // Toggle dropdown visibility
+    function toggleDropDown() {
+        setShowDropDown(prev => !prev);
+    }
+
+    // Close the dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutSide = (event) => {
+            if(dropDownRef.current && !dropDownRef.current.contains(event?.target)) {
+                setShowDropDown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutSide);
+        return () => document.removeEventListener('mousedown', handleClickOutSide);        
+
+    },[]);
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+        navigate('/');
+    }
 
     function moveToAddBlogPage() {
         navigate('/addBlog');
@@ -23,7 +50,7 @@ export const AppBar = ({publishCallBack, edit, blogId}: AppBarInputs) => {
     }
 
     return (
-        <div className="px-5 py-3 flex justify-between border-b ">
+        <div className="relative px-5 py-3 flex justify-between border-b ">
             <h1 className="text-3xl font-bold hover: cursor-pointer" onClick={() => navigate('/blogs')}>Blogsy</h1>
             <div className="flex justify-center items-center gap-3">
                 { location.pathname === '/addBlog' || location.pathname.startsWith('/edit/')?
@@ -43,9 +70,24 @@ export const AppBar = ({publishCallBack, edit, blogId}: AppBarInputs) => {
 
                 }
 
-                <div className="w-10 h-10">
+                <div className="w-10 h-10 hover:cursor-pointer" onClick={toggleDropDown}>
                     <Avatar initial={initial} bgColor="bg-gradient-to-br from-pink-500 to-orange-400"/>
                 </div>
+
+                {/* Dropdown */}
+                {showDropDwon && (
+                    <div
+                        ref={dropDownRef}
+                        className="absolute top-12 right-0 bg-white border rounded-md shadow-lg p-2 mt-2"
+                    >
+                        <button
+                            onClick={logout}
+                            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     )
