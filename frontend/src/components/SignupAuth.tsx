@@ -5,7 +5,7 @@ import { SignupType } from "@ctrlaltelite/common";
 import { BACKENDURL } from "../config";
 
 
-export const SignupAuth = () => {
+export const SignupAuth = ({setLoading}) => {
     const [postInput, setPostInput] = useState<SignupType>({
         email: '',
         name: '',
@@ -17,6 +17,7 @@ export const SignupAuth = () => {
 
     async function signUp() {
         try {
+            setLoading(true);
             const result = await axios({
                 method: 'post',
                 url: `${BACKENDURL}/user/signup`,
@@ -33,7 +34,8 @@ export const SignupAuth = () => {
             navigate('/blogs');
         }
         catch(error) {
-            alert('Error while signing in!')
+            alert(`Error while signing in!: ${error} `);
+            navigate('/signup');
         }
     }
 

@@ -5,7 +5,7 @@ import { SigninType } from "@ctrlaltelite/common";
 import { BACKENDURL } from "../config";
 
 
-export const SigninAuth = () => {
+export const SigninAuth = ({setLoading}) => {
     const [postInput, setPostInput] = useState<SigninType>({
         email: '',
         password: ''
@@ -14,6 +14,7 @@ export const SigninAuth = () => {
     const navigate = useNavigate();
 
     async function signUp() {
+        setLoading(true);
         const result = await axios({
             method: 'post',
             url: `${BACKENDURL}/user/signin`,
@@ -24,11 +25,8 @@ export const SigninAuth = () => {
             navigate('/blogs');
         }
         else {
-            return (
-                <div className="flex justify-center items-center bg-orange-400 text-3xl font-black">
-                    Error while signin
-                </div>
-            )
+            alert('Error while sigin in!');
+            navigate('/signin');
         }
     }
 
