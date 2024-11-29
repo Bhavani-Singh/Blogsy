@@ -4,10 +4,12 @@ import { BACKENDURL } from "../config";
 import { AppBar } from "../components/AppBar";
 import { useParams } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
-
+import { BlogSkeleton } from "../components/BlogSkeleton";
 
 function Blog() {
     const [blog, setBlog] = useState({});
+    const [loading, setLoading] = useState(true);
+
     const {id: blogId} = useParams();
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -22,6 +24,7 @@ function Blog() {
             });
 
             setBlog(result.data);
+            setLoading(false);
         }
 
         fetchBlog();
@@ -34,7 +37,9 @@ function Blog() {
     return(
         <div className="w-dvh h-dvh">
             <AppBar edit={userId === blog.authorId} blogId={blog.id}/>
-            <div key={blog.id} className="flex">
+            {!loading?
+            
+                <div key={blog.id} className="flex">
                 <div className="flex flex-col gap-4 w-[70%] p-10">
                     <div className="text-5xl font-bold">{blog.title}</div>
                     <div className="text-slate-400">{`Posted on ${blog.createdAt}`}</div>
@@ -71,6 +76,12 @@ function Blog() {
                     )}
                 </div>
             </div>
+
+            :
+
+            <BlogSkeleton />
+        }
+            
         </div>
     )
 }
