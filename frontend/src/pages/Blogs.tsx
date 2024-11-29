@@ -5,9 +5,11 @@ import { BACKENDURL } from "../config";
 import { AppBar } from "../components/AppBar";
 import { BlogType } from "@ctrlaltelite/common";
 import { useNavigate } from "react-router-dom";
+import { BlogsSkeleton } from "../components/BlogsSkeleton";
 
 export const Blogs = () => {
     const [blogs, setBlogs] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,6 +23,7 @@ export const Blogs = () => {
                 }
             });
             setBlogs(result.data);
+            setLoading(false);
         }  
 
         fetchBlogs();
@@ -28,8 +31,8 @@ export const Blogs = () => {
     
     return (
         <div className="w-dvw h-dvh">
-            
             <AppBar/>
+            { !loading ? 
             <div className=" flex flex-col items-center gap-1x">
 
                 {blogs.map( (blog: BlogType) => {
@@ -40,8 +43,15 @@ export const Blogs = () => {
                     )
                 })}
             </div>
-        </div>
+            :
         
+            <div className=" flex flex-col items-center gap-2">
+                <BlogsSkeleton />
+                <BlogsSkeleton />
+                <BlogsSkeleton />
+            </div>
+        }
+        </div>
         
     );
 }
